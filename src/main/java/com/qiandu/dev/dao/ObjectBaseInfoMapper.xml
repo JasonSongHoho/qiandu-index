@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qiandu.dev.dao.ObjectBaseInfoMapper">
+    <resultMap id="ObjectBaseInfo" type="com.qiandu.dev.bean.ObjectBaseInfo">
+        <id property="objectId" column="OBJECT_ID"/>
+        <result property="propertyId" column="PROPERTY_ID"/>
+        <result property="objectName" column="OBJECT_NAME"/>
+        <result property="objectPropertyId" column="OBJECT_PROPERTY_ID"/>
+        <result property="latitude" column="LATITUDE"/>
+        <result property="longitude" column="LONGITUDE"/>
+        <result property="beginTime" column="BEGIN_TIME"/>
+        <result property="endTime" column="END_TIME"/>
+        <result property="objectUriHash" column="OBJECT_URI_HASH"/>
+        <result property="propertyName" column="PROPERTY_NAME"/>
+        <result property="propertyUriHash" column="PROPERTY_URI_HASH"/>
+        <result property="valueType" column="VALUE_TYPE"/>
+        <result property="stringValue" column="STRING_VALUE"/>
+        <result property="datetimeValue" column="DATETIME_VALUE"/>
+        <result property="objectUri" column="OBJECT_URI"/>
+        <result property="note" column="NOTE"/>
+        <result property="propertyUri" column="PROPERTY_URI"/>
+        <result property="propertyTitle" column="PROPERTY_TITLE"/>
+        <result property="isRequired" column="IS_REQUIRED"/>
+        <result property="isSys" column="IS_SYS"/>
+        <result property="label" column="LABEL"/>
+    </resultMap>
+
+    <resultMap id="obMediaBean" type="com.qiandu.dev.bean.ObMediaBean">
+        <id property="mediaId" column="MEDIA_ID"/>
+        <result property="objectId" column="OBJECT_ID"/>
+        <result property="mediaTitle" column="MEDIA_TITLE"/>
+        <result property="mediaFormat" column="MEDIA_FORMAT"/>
+        <result property="note" column="NOTE"/>
+        <result property="profile" column="CONTENT" jdbcType="BLOB"/>
+    </resultMap>
+
+    <resultMap id="obNoteBean" type="com.qiandu.dev.bean.ObNoteBean">
+        <id property="noteId" column="NOTE_ID"/>
+        <result property="objectId" column="OBJECT_ID"/>
+        <result property="noteTitle" column="NOTE_TITLE"/>
+        <result property="note" column="NOTE"/>
+    </resultMap>
+
+    <select id="getById" parameterType="integer" resultMap="ObjectBaseInfo">
+        SELECT
+          OB_PROPERTY.OBJECT_ID,
+          OB_OBJECT.OBJECT_NAME,
+          OB_OBJECT.LATITUDE,
+          OB_OBJECT.LONGITUDE,
+          OB_OBJECT.BEGIN_TIME,
+          OB_OBJECT.END_TIME,
+          OB_PROPERTY.OBJECT_PROPERTY_ID,
+          OB_PROPERTY.PROPERTY_ID,
+          OB_PROPERTY.OBJECT_URI_HASH,
+          OB_PROPERTY.PROPERTY_NAME,
+          OB_PROPERTY.PROPERTY_URI_HASH,
+          OB_PROPERTY.VALUE_TYPE,
+          OB_PROPERTY.STRING_VALUE,
+          OB_PROPERTY.DATETIME_VALUE,
+          OD_OBJECT_PROPERTY.OBJECT_URI,
+          OD_OBJECT_PROPERTY.NOTE,
+          OD_OBJECT_PROPERTY.PROPERTY_URI,
+          OD_OBJECT_PROPERTY.PROPERTY_TITLE,
+          OD_OBJECT_PROPERTY.IS_REQUIRED,
+          OD_OBJECT_PROPERTY.IS_SYS,
+          OD_OBJECT_TYPE.LABEL
+        FROM OB_OBJECT, OB_PROPERTY, OD_OBJECT_PROPERTY, OD_OBJECT_TYPE
+        WHERE OB_PROPERTY.OBJECT_ID = #{objectId}
+          AND OB_OBJECT.OBJECT_ID=OB_PROPERTY.OBJECT_ID
+          AND OB_PROPERTY.OBJECT_PROPERTY_ID = OD_OBJECT_PROPERTY.OBJECT_PROPERTY_ID
+          AND OD_OBJECT_TYPE.OBJECT_URI = OD_OBJECT_PROPERTY.OBJECT_URI;
+      </select>
+
+    <select id="getNoteOfPropertyUri" parameterType="String" resultType="String">
+        SELECT NOTE FROM OD_PROPERTY_TYPE WHERE PROPERTY_URI=#{propertyUri};
+    </select>
+
+    <select id="getPropValueType" parameterType="String" resultType="String">
+        SELECT VALUE_TYPE  FROM OD_PROPERTY_TYPE WHERE PROPERTY_URI=#{propertyUri};
+    </select>
+
+    <select id="getPropDataFormat" parameterType="String" resultType="String">
+        SELECT DATA_FORMAT FROM OD_PROPERTY_TYPE WHERE PROPERTY_URI=#{propertyUri};
+    </select>
+
+    <select id="getPropUrlByPropId" parameterType="String" resultType="String">
+        SELECT PROPERTY_URI FROM OD_OBJECT_PROPERTY WHERE OBJECT_PROPERTY_ID=#{objectPropertyId};
+    </select>
+
+    <select id="getMedia" parameterType="int" resultMap="obMediaBean">
+        SELECT OB_MEDIA.MEDIA_ID,OB_MEDIA.OBJECT_ID,OB_MEDIA.MEDIA_TITLE,OB_MEDIA.MEDIA_FORMAT,OB_MEDIA.NOTE,DI_FILE.CONTENT
+        FROM OB_MEDIA,DI_FILE
+        WHERE OBJECT_ID=#{objectId} AND OB_MEDIA.MEDIA_URI=DI_FILE.FILE_ID;
+    </select>
+
+    <select id="getNote" parameterType="int" resultMap="obNoteBean">
+        SELECT OB_NOTE.NOTE_ID,OB_NOTE.OBJECT_ID,OB_NOTE.NOTE_TITLE,OB_NOTE.NOTE
+        FROM OB_NOTE
+        WHERE OBJECT_ID=#{objectId};
+    </select>
+
+</mapper>

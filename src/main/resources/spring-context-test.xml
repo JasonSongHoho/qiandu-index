@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-2.5.xsd
+						http://www.springframework.org/schema/tx
+						http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+	<context:component-scan base-package="com.qiandu.dev.service">
+	</context:component-scan>
+	<context:component-scan base-package="com.qiandu.dev.dao"/>
+
+	<!--<context:property-placeholder location="classpath*:datasource.properties"/>-->
+
+	<!--本体索引Elasticsearch集群配置-->
+	<bean id="esClusterBean" class="com.qiandu.dev.bean.EsClusterBean">
+		<property name="clusterName" value="qiandu-dev"/>
+		<property name="clusterIds" value="10.110.13.136,10.110.13.137,10.110.13.138"/>
+		<property name="indexName" value="ontology_datamodel_v_3_7"/>
+		<property name="typeName" value="baseinfo"/>
+		<property name="indexIds" value=""/>
+	</bean>
+
+	<!--频道索引-案件频道Elasticsearch集群配置-->
+	<bean id="lawCaseClusterBean" class="com.qiandu.dev.bean.EsClusterBean">
+		<property name="clusterName" value="qiandu-dev"/>
+		<property name="clusterIds" value="10.110.13.136,10.110.13.137,10.110.13.138"/>
+		<property name="indexName" value="channel_law_case2"/>
+		<property name="typeName" value="pdf_file"/>
+	</bean>
+
+	<!--MySQL数据库配置-->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		  destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://10.110.13.139/ontology" />
+		<property name="username" value="root" />
+		<property name="password" value="123456" />
+		<!-- 初始化连接大小 -->
+		<property name="initialSize" value="0" />
+		<!-- 连接池最大使用连接数量 -->
+		<property name="maxActive" value="20" />
+		<!-- 连接池最大空闲 -->
+		<property name="maxIdle" value="20" />
+		<!-- 连接池最小空闲 -->
+		<property name="minIdle" value="0" />
+		<!-- 获取连接最大等待时间 -->
+		<property name="maxWait" value="60000" />
+	</bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="mapperLocations" value="classpath:com/qiandu/dev/dao/*.xml"/>
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.qiandu.dev.dao"></property>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<tx:annotation-driven transaction-manager="txManager" />
+</beans>
